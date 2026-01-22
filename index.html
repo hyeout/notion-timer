@@ -28,25 +28,39 @@
             background-color: transparent;
             font-family: 'Noto Sans KR', sans-serif;
             padding: 20px;
-            overflow: hidden; /* 드래그 시 스크롤 방지 */
         }
 
+        /* 설정창이 밖으로 나갈 수 있도록 감싸는 전체 컨테이너 */
+        .main-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        /* 크기 조절이 가능한 시계 박스 */
         .outer-frame {
-            width: 200px; 
+            width: 240px; 
+            min-width: 180px;
+            min-height: 130px;
             background-color: #FFFFFF;
             border: 1.5px solid var(--border-color);
             border-radius: 25px;
             padding: 5px;
             box-sizing: border-box;
-            transition: border-color 0.3s ease;
+            resize: both; 
+            overflow: hidden; /* 크기 조절을 위해 필요 */
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            z-index: 1;
         }
 
         .inner-color-bg {
             background-color: var(--bg-color);
             border-radius: 20px;
-            padding: 10px 8px;
+            padding: 10px 12px;
             display: flex;
             flex-direction: column;
+            flex: 1;
             transition: background-color 0.3s ease;
         }
 
@@ -63,27 +77,35 @@
             align-items: center;
             font-size: 11px;
             font-weight: 700;
-            gap: 4px;
+            gap: 5px;
         }
         
-        .heart-icon, .settings-trigger {
-            font-size: 11px;
-            line-height: 1;
-            display: flex;
-            align-items: center;
+        /* 하트 이미지 (SVG) */
+        .heart-img {
+            width: 12px;
+            height: 12px;
+            fill: var(--border-color);
+            display: inline-block;
+            pointer-events: none; /* 클릭 방해 금지 */
         }
 
-        .settings-trigger { cursor: pointer; transition: transform 0.2s; }
-        .settings-trigger:hover { transform: scale(1.1); }
+        .settings-trigger { 
+            cursor: pointer; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s; 
+        }
+        .settings-trigger:hover { transform: scale(1.2); }
 
         .clock-screen {
             background-color: #FFFFFF;
             border: 1.5px solid var(--border-color);
             border-radius: 15px;
-            padding: 15px 0;
+            flex: 1;
             display: flex;
             justify-content: center;
-            align-items: baseline;
+            align-items: center;
             position: relative;
             background-image: 
                 linear-gradient(var(--grid-color) 1px, transparent 1px),
@@ -91,120 +113,122 @@
             background-size: 8px 8px;
         }
 
-        .time-text { font-size: 38px; color: var(--text-color); letter-spacing: -1px; }
-        .ampm-text { font-size: 11px; color: var(--border-color); margin-left: 4px; font-weight: 700; }
+        .time-wrapper { display: flex; align-items: baseline; }
+        .time-text { font-size: 42px; color: var(--text-color); letter-spacing: -1px; }
+        .ampm-text { font-size: 12px; color: var(--border-color); margin-left: 5px; font-weight: 700; }
 
-        /* 설정 팝업 - 드래그 가능 스타일 */
+        /* --- [설정 팝업 - 시계 박스 밖으로 분리] --- */
         #settingsPanel {
-            width: 180px;
+            width: 190px;
             background: #fff;
             border: 1.5px solid var(--border-color);
             border-radius: 12px;
             display: none; 
-            position: absolute;
-            left: 220px;
-            top: 20px;
-            z-index: 100;
-            padding: 0; /* 헤더 영역 분리를 위해 0으로 조정 */
-            font-size: 11px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-            cursor: default;
-            user-select: none;
+            position: absolute; /* main-wrapper 기준 절대 위치 */
+            left: 50px;
+            top: 50px;
+            z-index: 100; /* 시계보다 위에 표시 */
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            overflow: hidden;
+            cursor: move; /* 어디를 잡아도 이동 가능함을 표시 */
         }
 
-        /* 드래그 핸들 (상단바) */
-        .settings-header {
-            background: var(--bg-color);
-            padding: 8px 12px;
-            border-radius: 11px 11px 0 0;
-            cursor: move; /* 이동 가능 아이콘 */
-            font-weight: bold;
-            color: var(--border-color);
-            text-align: center;
-            border-bottom: 1px dashed var(--border-color);
+        .win-header {
+            background-color: var(--border-color);
+            padding: 8px 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
         }
 
-        .settings-content {
-            padding: 12px;
+        .win-title { font-size: 11px; font-weight: 700; pointer-events: none; }
+        .win-controls { display: flex; gap: 4px; }
+        .win-btn {
+            width: 18px; height: 18px;
+            background-color: white;
+            border: none;
+            border-radius: 3px;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--border-color); font-size: 12px; cursor: pointer;
         }
+
+        .settings-content { padding: 12px; cursor: default; } /* 입력창 등은 드래그 제외 */
 
         .theme-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            margin-bottom: 12px;
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            gap: 6px; margin-bottom: 12px;
         }
 
         .theme-btn {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            cursor: pointer;
-            border: 1px solid #eee;
-            border-radius: 5px;
-            padding: 5px 0;
+            display: flex; flex-direction: column; align-items: center;
+            cursor: pointer; border: 1px solid #eee; border-radius: 5px;
+            padding: 5px 0; transition: 0.2s;
         }
-
-        .theme-preview {
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            margin-bottom: 4px;
-            border: 1px solid rgba(0,0,0,0.05);
-        }
-
+        .theme-btn:hover { border-color: var(--border-color); background: #fafafa; }
+        .theme-preview { width: 14px; height: 14px; border-radius: 50%; margin-bottom: 4px; border: 1px solid rgba(0,0,0,0.05); }
         .theme-name { font-size: 9px; color: #888; }
-        .setting-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-        input[type="color"] { width: 20px; height: 18px; border: 1px solid #eee; padding: 0; cursor: pointer; }
-        select { font-size: 10px; width: 105px; padding: 2px; border: 1px solid #ddd; border-radius: 3px; }
-        .close-btn { width: 100%; margin-top: 5px; padding: 5px; background: var(--bg-color); border: 1px solid var(--border-color); color: var(--border-color); border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 10px; }
+
+        .setting-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 11px; color: #666; }
+        input[type="color"] { width: 22px; height: 18px; border: 1px solid #ddd; padding: 0; cursor: pointer; background: none; }
+        select { font-size: 10px; width: 100px; padding: 2px; border: 1px solid #ddd; border-radius: 3px; outline: none; }
     </style>
 </head>
 <body>
 
-<div class="outer-frame">
-    <div class="inner-color-bg">
-        <div class="header">
-            <div class="header-left">
-                <span class="heart-icon">❤</span>
-                <span id="dateDisplay">1.20 TUE</span>
+<div class="main-wrapper">
+    <div class="outer-frame">
+        <div class="inner-color-bg">
+            <div class="header">
+                <div class="header-left">
+                    <svg class="heart-img" viewBox="0 0 32 32"><path d="M16 28.5L14.1 26.8C7.33 20.6 3 16.6 3 11.8C3 7.82 6.13 4.75 10.1 4.75C12.3 4.75 14.5 5.78 16 7.41C17.5 5.78 19.7 4.75 21.9 4.75C25.9 4.75 29 7.82 29 11.8C29 16.6 24.7 20.6 17.9 26.8L16 28.5Z"/></svg>
+                    <span id="dateDisplay">1.22 THU</span>
+                </div>
+                <div class="settings-trigger" onclick="toggleSettings()">
+                    <svg class="heart-img" viewBox="0 0 32 32"><path d="M16 28.5L14.1 26.8C7.33 20.6 3 16.6 3 11.8C3 7.82 6.13 4.75 10.1 4.75C12.3 4.75 14.5 5.78 16 7.41C17.5 5.78 19.7 4.75 21.9 4.75C25.9 4.75 29 7.82 29 11.8C29 16.6 24.7 20.6 17.9 26.8L16 28.5Z"/></svg>
+                </div>
             </div>
-            <div class="settings-trigger" onclick="toggleSettings()">❤</div>
-        </div>
-        <div class="clock-screen">
-            <span class="time-text" id="timeDisplay">00 00</span>
-            <span class="ampm-text" id="ampmDisplay">PM</span>
+            <div class="clock-screen">
+                <div class="time-wrapper">
+                    <span class="time-text" id="timeDisplay">00 00</span>
+                    <span class="ampm-text" id="ampmDisplay">PM</span>
+                </div>
+            </div>
         </div>
     </div>
-</div>
 
-<div id="settingsPanel">
-    <div class="settings-header" id="dragHandle">Widget Settings</div>
-    
-    <div class="settings-content">
-        <div class="theme-grid">
-            <div class="theme-btn" onclick="setTheme('#FFB7C5', '#fef5f8')"><div class="theme-preview" style="background: #FFB7C5;"></div><div class="theme-name">핑크</div></div>
-            <div class="theme-btn" onclick="setTheme('#DCD0FF', '#f9f7ff')"><div class="theme-preview" style="background: #DCD0FF;"></div><div class="theme-name">퍼플</div></div>
-            <div class="theme-btn" onclick="setTheme('#999999', '#f5f5f5')"><div class="theme-preview" style="background: #999999;"></div><div class="theme-name">다크</div></div>
-            <div class="theme-btn" onclick="setTheme('#D3D3D3', '#ffffff')"><div class="theme-preview" style="background: #D3D3D3;"></div><div class="theme-name">화이트</div></div>
-            <div class="theme-btn" onclick="setTheme('#B2D8B2', '#f6faf6')"><div class="theme-preview" style="background: #B2D8B2;"></div><div class="theme-name">그린</div></div>
-            <div class="theme-btn" onclick="setTheme('#B0C4DE', '#f4f8fb')"><div class="theme-preview" style="background: #B0C4DE;"></div><div class="theme-name">블루</div></div>
-        </div>
-
-        <div style="border-top: 1px dashed #eee; padding-top: 10px;">
-            <div class="setting-item">테두리 <input type="color" id="borderColor"></div>
-            <div class="setting-item">배경색 <input type="color" id="bgColor"></div>
-            <div class="setting-item">글자색 <input type="color" id="textColor"></div>
-            <div class="setting-item" style="margin-top:5px;">
-                폰트 <select id="fontSelect" onchange="changeFont(this.value)">
-                    <option value="sans-serif">기본</option>
-                    <option value="'DOSIyagi'">DOS 이야기체</option>
-                    <option value="'DNFBitBit'">던파 비트비트</option>
-                    <option value="'Cafe24PROUP'">카페24 프라우프</option>
-                </select>
+    <div id="settingsPanel">
+        <div class="win-header">
+            <div class="win-title">Settings</div>
+            <div class="win-controls">
+                <div class="win-btn" onclick="toggleSettings()">×</div>
             </div>
         </div>
-        <button class="close-btn" onclick="toggleSettings()">설정 닫기</button>
+        
+        <div class="settings-content" onmousedown="event.stopPropagation()">
+            <div class="theme-grid">
+                <div class="theme-btn" onclick="setTheme('#FFB7C5', '#fef5f8')"><div class="theme-preview" style="background: #FFB7C5;"></div><div class="theme-name">기본</div></div>
+                <div class="theme-btn" onclick="setTheme('#DCD0FF', '#f9f7ff')"><div class="theme-preview" style="background: #DCD0FF;"></div><div class="theme-name">퍼플</div></div>
+                <div class="theme-btn" onclick="setTheme('#333333', '#f5f5f5')"><div class="theme-preview" style="background: #333333;"></div><div class="theme-name">다크</div></div>
+                <div class="theme-btn" onclick="setTheme('#D3D3D3', '#ffffff')"><div class="theme-preview" style="background: #D3D3D3;"></div><div class="theme-name">화이트</div></div>
+                <div class="theme-btn" onclick="setTheme('#B2D8B2', '#f6faf6')"><div class="theme-preview" style="background: #B2D8B2;"></div><div class="theme-name">그린</div></div>
+                <div class="theme-btn" onclick="setTheme('#B0C4DE', '#f4f8fb')"><div class="theme-preview" style="background: #B0C4DE;"></div><div class="theme-name">블루</div></div>
+            </div>
+
+            <div style="border-top: 1px dashed #eee; padding-top: 10px;">
+                <div class="setting-item">테두리 <input type="color" id="borderColor"></div>
+                <div class="setting-item">배경색 <input type="color" id="bgColor"></div>
+                <div class="setting-item">글자색 <input type="color" id="textColor"></div>
+                <div class="setting-item">폰트 
+                    <select id="fontSelect" onchange="changeFont(this.value)">
+                        <option value="sans-serif">기본</option>
+                        <option value="'DOSIyagi'">DOS 이야기체</option>
+                        <option value="'DNFBitBit'">던파 비트비트</option>
+                        <option value="'Cafe24PROUP'">카페24 프라우프</option>
+                    </select>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -241,10 +265,15 @@
         document.getElementById('bgColor').value = config.bg;
         document.getElementById('textColor').value = config.text;
         document.getElementById('fontSelect').value = config.font;
+        document.querySelectorAll('.heart-img').forEach(img => img.style.fill = config.border);
+        document.getElementById('settingsPanel').style.borderColor = config.border;
     }
 
     function setTheme(border, bg) { config.border = border; config.bg = bg; saveConfig(); }
-    function toggleSettings() { const panel = document.getElementById('settingsPanel'); panel.style.display = (panel.style.display === 'block') ? 'none' : 'block'; }
+    function toggleSettings() { 
+        const panel = document.getElementById('settingsPanel'); 
+        panel.style.display = (panel.style.display === 'block') ? 'none' : 'block'; 
+    }
     function changeFont(font) { config.font = font; saveConfig(); }
     function saveConfig() { localStorage.setItem('yy-today-vFinal-Theme', JSON.stringify(config)); applyConfig(); }
 
@@ -252,13 +281,23 @@
     document.getElementById('bgColor').addEventListener('input', (e) => { config.bg = e.target.value; saveConfig(); });
     document.getElementById('textColor').addEventListener('input', (e) => { config.text = e.target.value; saveConfig(); });
 
-    // --- [드래그 기능 로직] ---
+    // --- [설정창 드래그 기능: 어디든 잡고 이동] ---
     const settingsPanel = document.getElementById('settingsPanel');
-    const dragHandle = document.getElementById('dragHandle');
     let isDragging = false;
     let offset = { x: 0, y: 0 };
 
-    dragHandle.addEventListener('mousedown', (e) => {
+    settingsPanel.addEventListener('mousedown', (e) => {
+        // 버튼이나 입력창을 클릭했을 때는 드래그 되지 않도록 예외 처리
+        if (e.target.closest('.win-btn') || e.target.closest('.settings-content')) return;
+        
+        isDragging = true;
+        offset.x = e.clientX - settingsPanel.offsetLeft;
+        offset.y = e.clientY - settingsPanel.offsetTop;
+    });
+
+    // 헤더 부분을 잡았을 때도 드래그 가능하게
+    settingsPanel.querySelector('.win-header').addEventListener('mousedown', (e) => {
+        if (e.target.closest('.win-btn')) return;
         isDragging = true;
         offset.x = e.clientX - settingsPanel.offsetLeft;
         offset.y = e.clientY - settingsPanel.offsetTop;
